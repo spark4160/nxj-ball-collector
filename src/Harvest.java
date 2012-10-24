@@ -1,3 +1,4 @@
+// Test
 import lejos.nxt.*;
 import lejos.robotics.objectdetection.*;
 import lejos.util.*;

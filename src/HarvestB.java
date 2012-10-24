@@ -4,7 +4,7 @@ import lejos.robotics.objectdetection.*;
 import lejos.util.*;
 
 
-public class Harvest {
+public class HarvestB {
 
 	/**
 	 * @param args

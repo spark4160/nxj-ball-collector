@@ -16,13 +16,15 @@ public class HarvestB {
 			// Reverse for half a second (?)
 			// Search for next ball
 		// If reached ball
-			// If ball is dark pick up
+			// If ball is light pick up
 			// Else let it be, reverse for half a second then search for next ball
 		// If the robot spins multiple times without detecting a ball then
-		// move in one direction a bit and search again
-		// if still no balls are present after three movements
-		// then move to edge of circle and end program
-		
+		// Move in one direction a bit and search again
+		// If collected all balls of that colour
+			// Proceed to the location required to dump balls
+		// If still no balls are present after three movements
+			// Then move to edge of circle and end program
+				
 		// Ports:
 		// S1: Ultrasonic
 		// S2: IR Down 

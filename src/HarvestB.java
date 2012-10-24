@@ -22,6 +22,8 @@ public class HarvestB {
 		// Move in one direction a bit and search again
 		// If collected all balls of that colour
 			// Proceed to the location required to dump balls
+		// If there are more balls
+			// Then repeat the program for the different coloured balls
 		// If still no balls are present after three movements
 			// Then move to edge of circle and end program
 				

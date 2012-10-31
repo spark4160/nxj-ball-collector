@@ -47,6 +47,10 @@ public class HarvestB {
 		// MB: Forklift
 		// MC: Right Wheel
 
+		// Nothing: 30
+		// Silver: 57
+		// Blue: 36
+
 		feature.addListener(new FeatureListener() {
 			public void featureDetected(Feature feature,
 					FeatureDetector detector) {
@@ -57,20 +61,11 @@ public class HarvestB {
 		armTimer.stop();
 		trayTimer.stop();
 		stopTimer.stop();
-		
-		Motor.B.setSpeed(90);
-		liftArm();
 
-		LCD.drawInt((int) scanOnce().getRangeReading().getRange(), 0, 0);
-		dropArm();
-		Motor.A.forward();
-		Motor.C.forward();
-		while (ballLight.getLightValue() < 50)
-			continue;
-		liftArm();
-		Motor.A.stop();
-		Motor.C.stop();
-		Button.waitForAnyPress();
+		while (!Button.ESCAPE.isDown()) {
+			LCD.drawInt(ballLight.getLightValue(), 0, 0);
+		}
+
 		System.exit(0);
 
 		// LCD.drawString("Connecting...", 0, 0);
@@ -180,22 +175,43 @@ public class HarvestB {
 			return false;
 		}
 	}
-	
-	private static void dropArm(){
+
+	private static void dropArm() {
 		Motor.B.backward();
 		armTimerDing = false;
 		armTimer.start();
-		while(!armTimerDing)
+		while (!armTimerDing)
 			continue;
 		Motor.B.stop();
 	}
-	
-	private static void liftArm(){
+
+	private static void liftArm() {
 		Motor.B.forward();
 		armTimerDing = false;
 		armTimer.start();
-		while(!armTimerDing)
+		while (!armTimerDing)
 			continue;
 		Motor.B.stop();
+	}
+
+	private static int moveToBall() {
+		// 0: time out, 1: hit line, 2: silver ball, 3: blue ball
+		
+	}
+
+	private static void Test1() {
+		Motor.B.setSpeed(90);
+		liftArm();
+
+		LCD.drawInt((int) scanOnce().getRangeReading().getRange(), 0, 0);
+		dropArm();
+		Motor.A.forward();
+		Motor.C.forward();
+		while (ballLight.getLightValue() < 30)
+			continue;
+		liftArm();
+		Motor.A.stop();
+		Motor.C.stop();
+		Button.waitForAnyPress();
 	}
 }

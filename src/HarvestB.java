@@ -14,6 +14,7 @@ import lejos.robotics.objectdetection.Feature;
 import lejos.robotics.objectdetection.FeatureDetector;
 import lejos.robotics.objectdetection.RangeFeatureDetector;
 import lejos.robotics.objectdetection.FeatureListener;
+import lejos.util.Delay;
 import lejos.util.TimerListener;
 import lejos.util.Timer;
 
@@ -61,10 +62,15 @@ public class HarvestB {
 		armTimer.stop();
 		trayTimer.stop();
 		stopTimer.stop();
+		Motor.B.setSpeed(180);
 
-		while (!Button.ESCAPE.isDown()) {
-			LCD.drawInt(ballLight.getLightValue(), 0, 0);
-		}
+		liftArm();
+		scanOnce();
+		moveToBall(2);
+		
+//		while(Button.ESCAPE.isUp()){
+//			LCD.drawInt(ballLight.getLightValue(), 0, 0);
+//		}
 
 		System.exit(0);
 
@@ -100,7 +106,7 @@ public class HarvestB {
 	});
 
 	private static boolean armTimerDing;
-	private static Timer armTimer = new Timer(1500, new TimerListener() {
+	private static Timer armTimer = new Timer(750, new TimerListener() {
 		public void timedOut() {
 			armTimerDing = true;
 			armTimer.stop();
@@ -126,16 +132,12 @@ public class HarvestB {
 		Motor.C.backward();
 		while (lastFeature == null && !stopTimerDing)
 			continue;
+		Delay.msDelay(200);
 		Motor.A.stop();
 		Motor.C.stop();
 		feature.enableDetection(false);
 		stopTimer.stop();
 		return lastFeature;
-	}
-
-	private void pickUp() {
-		Motor.B.forward();
-		armTimer.start();
 	}
 
 	private int lineFollow() {
@@ -194,9 +196,43 @@ public class HarvestB {
 		Motor.B.stop();
 	}
 
-	private static int moveToBall() {
-		// 0: time out, 1: hit line, 2: silver ball, 3: blue ball
-		
+	private static int moveToBall(int ballType) {
+		// 0: wrong ball, 1: hit line, 2: silver ball, 3: blue ball
+		int ret = 0;
+		int control = ballLight.getLightValue();
+		dropArm();
+		Motor.A.forward();
+		Motor.C.forward();
+		boolean move = true;
+		while (move) {
+			if (ballLight.getLightValue() > control + 5) {
+				move = false;
+			}
+			// if(downColour.getColorID() == 90){
+			// // stop
+			// move = false;
+			// ret = 1;
+			// }
+		}
+		Delay.msDelay(400);
+		if (ret == 0 && ballType == 2 && ballLight.getLightValue() > control + 15) {
+			liftArm();
+			ret = 2;
+		} else if (ret == 0 && ballType == 3 && ballLight.getLightValue() <= control + 15) {
+			liftArm();
+			ret = 3;
+		} else {
+			Motor.A.backward();
+			Motor.C.backward();
+			Delay.msDelay(2000);
+			liftArm();
+			Motor.A.forward();
+			Motor.C.backward();
+			Delay.msDelay(2000);
+		}
+		Motor.A.stop();
+		Motor.C.stop();
+		return ret;
 	}
 
 	private static void Test1() {

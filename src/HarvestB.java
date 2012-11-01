@@ -1,6 +1,7 @@
 import java.io.IOException;
 
 import lejos.nxt.Button;
+import lejos.nxt.ButtonListener;
 import lejos.nxt.ColorSensor;
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
@@ -52,6 +53,15 @@ public class HarvestB {
 		// Silver: 57
 		// Blue: 36
 
+		Button.ESCAPE.addButtonListener(new ButtonListener(){
+			public void buttonPressed(Button b) {
+				// Do nothing
+			}
+
+			public void buttonReleased(Button b) {
+				System.exit(1);
+			}
+		});
 		feature.addListener(new FeatureListener() {
 			public void featureDetected(Feature feature,
 					FeatureDetector detector) {
@@ -63,27 +73,35 @@ public class HarvestB {
 		trayTimer.stop();
 		stopTimer.stop();
 		Motor.B.setSpeed(180);
-
-		liftArm();
-		scanOnce();
-		moveToBall(2);
+		NXTF.B.setSpeed(90);
+		NXTF.B.stop();
 		
-//		while(Button.ESCAPE.isUp()){
-//			LCD.drawInt(ballLight.getLightValue(), 0, 0);
-//		}
-
+		// Bluetooth connect
+		LCD.drawString("Connecting...", 0, 0);
+		if (BTConnect()) {
+			LCD.clear();
+			LCD.drawString("Connected.", 0, 0);
+		} else {
+			LCD.clear();
+			LCD.drawString("Connect fail.", 0, 0);
+		}
+		Button.waitForAnyPress();
+		
+		// Run program
+		// 2: silver, 3: blue
+		int searchBall = 2;
+		int collected = 0;
+		for(int strikes = 0; strikes < 3; strikes++){
+			if(scanOnce() != null){
+				
+			}
+			if(moveToBall(searchBall) == searchBall){
+				collected++;
+				strikes = 0;
+			}
+		}
+		
 		System.exit(0);
-
-		// LCD.drawString("Connecting...", 0, 0);
-		// if (BTConnect()) {
-		// LCD.clear();
-		// LCD.drawString("Connected.", 0, 0);
-		// } else {
-		// LCD.clear();
-		// LCD.drawString("Connect fail.", 0, 0);
-		// }
-		// Button.waitForAnyPress();
-		// System.exit(1);
 	}
 
 	private static UltrasonicSensor ultra = new UltrasonicSensor(SensorPort.S2);
@@ -114,7 +132,7 @@ public class HarvestB {
 	});
 
 	private static boolean trayTimerDing;
-	private static Timer trayTimer = new Timer(200, new TimerListener() {
+	private static Timer trayTimer = new Timer(1500, new TimerListener() {
 		public void timedOut() {
 			trayTimerDing = true;
 			trayTimer.stop();
@@ -165,7 +183,11 @@ public class HarvestB {
 
 	private static void dumpTray() {
 		NXTF.B.forward();
+		trayTimerDing = false;
 		trayTimer.start();
+		while (!trayTimerDing)
+			continue;
+		NXTF.B.stop();
 	}
 
 	private static boolean BTConnect() {
@@ -215,10 +237,12 @@ public class HarvestB {
 			// }
 		}
 		Delay.msDelay(400);
-		if (ret == 0 && ballType == 2 && ballLight.getLightValue() > control + 15) {
+		if (ret == 0 && ballType == 2
+				&& ballLight.getLightValue() > control + 15) {
 			liftArm();
 			ret = 2;
-		} else if (ret == 0 && ballType == 3 && ballLight.getLightValue() <= control + 15) {
+		} else if (ret == 0 && ballType == 3
+				&& ballLight.getLightValue() <= control + 15) {
 			liftArm();
 			ret = 3;
 		} else {
@@ -233,21 +257,5 @@ public class HarvestB {
 		Motor.A.stop();
 		Motor.C.stop();
 		return ret;
-	}
-
-	private static void Test1() {
-		Motor.B.setSpeed(90);
-		liftArm();
-
-		LCD.drawInt((int) scanOnce().getRangeReading().getRange(), 0, 0);
-		dropArm();
-		Motor.A.forward();
-		Motor.C.forward();
-		while (ballLight.getLightValue() < 30)
-			continue;
-		liftArm();
-		Motor.A.stop();
-		Motor.C.stop();
-		Button.waitForAnyPress();
 	}
 }

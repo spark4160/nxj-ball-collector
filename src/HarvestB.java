@@ -53,7 +53,7 @@ public class HarvestB {
 		// Silver: 57
 		// Blue: 36
 
-		Button.ESCAPE.addButtonListener(new ButtonListener(){
+		Button.ESCAPE.addButtonListener(new ButtonListener() {
 			public void buttonPressed(Button b) {
 				// Do nothing
 			}
@@ -73,9 +73,7 @@ public class HarvestB {
 		trayTimer.stop();
 		stopTimer.stop();
 		Motor.B.setSpeed(180);
-		NXTF.B.setSpeed(90);
-		NXTF.B.stop();
-		
+
 		// Bluetooth connect
 		LCD.drawString("Connecting...", 0, 0);
 		if (BTConnect()) {
@@ -85,22 +83,67 @@ public class HarvestB {
 			LCD.clear();
 			LCD.drawString("Connect fail.", 0, 0);
 		}
-		Button.waitForAnyPress();
 		
-		// Run program
+		NXTF.B.setSpeed(90);
+		NXTF.B.stop();
+
+		// Run program		
 		// 2: silver, 3: blue
 		int searchBall = 2;
 		int collected = 0;
-		for(int strikes = 0; strikes < 3; strikes++){
-			if(scanOnce() != null){
-				
+		int strikes;
+		liftArm();
+		for(searchBall = 2; searchBall < 4; searchBall++){
+			for(strikes = 0; strikes < 3; strikes++){
+				if(scanOnce() == null){
+					// Move a little
+					Motor.A.forward();
+					Motor.C.backward();
+					Delay.msDelay(4000);
+					Motor.A.forward();
+					Motor.C.forward();
+					Delay.msDelay(4000);
+					Motor.A.stop();
+					Motor.C.stop();
+				}else{
+					int found = moveToBall(searchBall);
+					if(found == searchBall){
+						collected++;
+						strikes = 0;
+						if(collected == 4){
+							strikes = 4;
+						}
+					}else if(found > 1){
+						strikes = 0;
+					}
+						Motor.A.forward();
+						Motor.C.backward();
+						Delay.msDelay(4000);
+						Motor.A.forward();
+						Motor.C.forward();
+						Delay.msDelay(8000);
+						Motor.A.stop();
+						Motor.C.stop();
+				}
 			}
-			if(moveToBall(searchBall) == searchBall){
-				collected++;
-				strikes = 0;
+			// If strikes = 4 then dump
+			// If strikes = 3 then exit
+			if(strikes == 3){
+				System.exit(2);
+			}else{
+				dumpTray();
+				Motor.A.setSpeed(360);
+				Motor.C.setSpeed(360);
+				Motor.A.forward();
+				Motor.C.forward();
+				Delay.msDelay(1000);
+				Motor.A.stop();
+				Motor.C.stop();
+				Motor.A.setSpeed(90);
+				Motor.C.setSpeed(90);
 			}
 		}
-		
+
 		System.exit(0);
 	}
 
@@ -116,7 +159,7 @@ public class HarvestB {
 	private static RemoteNXT NXTF;
 
 	private static boolean stopTimerDing;
-	private static Timer stopTimer = new Timer(10000, new TimerListener() {
+	private static Timer stopTimer = new Timer(20000, new TimerListener() {
 		public void timedOut() {
 			stopTimerDing = true;
 			stopTimer.stop();
@@ -182,7 +225,7 @@ public class HarvestB {
 	}
 
 	private static void dumpTray() {
-		NXTF.B.forward();
+		NXTF.B.backward();
 		trayTimerDing = false;
 		trayTimer.start();
 		while (!trayTimerDing)

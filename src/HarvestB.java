@@ -226,10 +226,30 @@ public class HarvestB {
 
 	private static void dumpTray() {
 		NXTF.B.backward();
+		Motor.A.backward();
+		Motor.C.backward();
 		trayTimerDing = false;
 		trayTimer.start();
 		while (!trayTimerDing)
 			continue;
+		Motor.A.Stop();
+		Motor.C.Stop();
+		NXTF.B.stop();
+		
+		trayTimerDing = false;
+		trayTimer.start();
+		while (!trayTimerDing)
+			continue;
+
+		NXTF.B.forward();
+		Motor.A.forward();
+		Motor.C.forward();
+		trayTimerDing = false;
+		trayTimer.start();
+		while (!trayTimerDing)
+			continue;
+		Motor.A.Stop();
+		Motor.C.Stop();
 		NXTF.B.stop();
 	}
 

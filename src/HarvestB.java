@@ -2,7 +2,7 @@ import java.io.IOException;
 
 import lejos.nxt.Button;
 import lejos.nxt.ButtonListener;
-import lejos.nxt.ColorSensor;
+import lejos.nxt.ColourSensor;
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
@@ -152,7 +152,7 @@ public class HarvestB {
 			60, 10);
 	private static Feature lastFeature;
 
-	private static ColorSensor downColour = new ColorSensor(SensorPort.S1);
+	private static ColourSensor downColour = new ColourSensor(SensorPort.S1);
 	private static LightSensor ballLight = new LightSensor(SensorPort.S3);
 
 	private static NXTCommConnector connector;
@@ -293,7 +293,7 @@ public class HarvestB {
 			if (ballLight.getLightValue() > control + 5) {
 				move = false;
 			}
-			// if(downColour.getColorID() == 90){
+			// if(downColour.getColourID() == 90){
 			// // stop
 			// move = false;
 			// ret = 1;

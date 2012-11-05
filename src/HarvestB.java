@@ -11,6 +11,7 @@ import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.Bluetooth;
 import lejos.nxt.comm.NXTCommConnector;
 import lejos.nxt.remote.RemoteNXT;
+import lejos.robotics.Color;
 import lejos.robotics.objectdetection.Feature;
 import lejos.robotics.objectdetection.FeatureDetector;
 import lejos.robotics.objectdetection.RangeFeatureDetector;
@@ -73,8 +74,9 @@ public class HarvestB {
 		trayTimer.stop();
 		stopTimer.stop();
 		Motor.B.setSpeed(180);
-		
-		//testBallLight();
+
+		// testBallLight();
+		// testDownColour();
 
 		// Bluetooth connect
 		LCD.drawString("Connecting...", 0, 0);
@@ -85,73 +87,66 @@ public class HarvestB {
 			LCD.clear();
 			LCD.drawString("Connect fail.", 0, 0);
 		}
-		
+
 		NXTF.B.setSpeed(90);
 		NXTF.B.stop();
 
-		//reset tray
-		
+		// reset tray
+
 		NXTF.B.forward();
 		trayTimerDing = false;
 		trayTimer.start();
 		while (!trayTimerDing)
 			continue;
 		NXTF.B.stop();
+
+		dumpTray();
+		System.exit(0);
 		
-		// Run program		
+		// Run program
 		// 2: silver, 3: blue
 		int searchBall = 2;
 		int collected = 0;
 		int strikes;
 		liftArm();
-		for(searchBall = 2; searchBall < 4; searchBall++){
-			for(strikes = 0; strikes < 3; strikes++){
-				if(scanOnce() == null){
+		for (searchBall = 2; searchBall < 4; searchBall++) {
+			for (strikes = 0; strikes < 3; strikes++) {
+				if (scanOnce() == null) {
 					// Move a little
 					Motor.A.forward();
 					Motor.C.backward();
 					Delay.msDelay(4000);
-					Motor.A.forward();
-					Motor.C.forward();
-					Delay.msDelay(4000);
-					Motor.A.stop();
-					Motor.C.stop();
-				}else{
+					if (moveForward(5000) == 1) {
+						recoil();
+					}
+				} else {
 					int found = moveToBall(searchBall);
-					if(found == searchBall){
+					if (found == searchBall) {
 						collected++;
 						strikes = 0;
-						if(collected == 4){
+						if (collected == 4) {
 							strikes = 4;
 						}
-					}else if(found > 1){
+					} else if (found > 1) {
 						strikes = 0;
 					}
-						Motor.A.forward();
-						Motor.C.backward();
-						Delay.msDelay(4000);
-						Motor.A.forward();
-						Motor.C.forward();
-						Delay.msDelay(8000);
-						Motor.A.stop();
-						Motor.C.stop();
+					Motor.A.forward();
+					Motor.C.backward();
+					Delay.msDelay(4000);
+					if (moveForward(5000) == 1) {
+						recoil();
+					}
 				}
 			}
 			// If strikes = 4 then dump
 			// If strikes = 3 then exit
-			if(strikes == 3){
+			if (strikes == 3) {
 				System.exit(2);
-			}else{
-				dumpTray();
-				Motor.A.setSpeed(360);
-				Motor.C.setSpeed(360);
-				Motor.A.forward();
-				Motor.C.forward();
-				Delay.msDelay(1000);
-				Motor.A.stop();
-				Motor.C.stop();
-				Motor.A.setSpeed(90);
-				Motor.C.setSpeed(90);
+			} else {
+				// Move to the line
+				moveForward(100000);
+				lineFollow(searchBall);
+				// Dump
 			}
 		}
 
@@ -186,7 +181,7 @@ public class HarvestB {
 	});
 
 	private static boolean trayTimerDing;
-	private static Timer trayTimer = new Timer(1500, new TimerListener() {
+	private static Timer trayTimer = new Timer(800, new TimerListener() {
 		public void timedOut() {
 			trayTimerDing = true;
 			trayTimer.stop();
@@ -212,59 +207,75 @@ public class HarvestB {
 		return lastFeature;
 	}
 
-	private int lineFollow() {
-		// 0 = end of line?, 1 = yellow block, 2 = blue block
-		final int ret = 0;
-		final boolean follow = true;
+	private static void lineFollow(int zone) {
+		// 2 = green block (silver), 3 = blue block (blue)
 		boolean left = true;
-		Motor.A.setSpeed(200);
-		Motor.C.setSpeed(200);
+		boolean follow = true;
+		Motor.A.setSpeed(360);
+		Motor.C.setSpeed(360);
 		Motor.C.stop();
 		Motor.A.forward();
-		while (!Button.ESCAPE.isDown()) {
-			if (left && downColour.getLightValue() > 50) {
-				left = false;
-				Motor.C.stop();
-				Motor.A.forward();
-			} else if (!left && downColour.getLightValue() < 50) {
-				left = true;
-				Motor.A.stop();
-				Motor.C.forward();
+		while (follow) {
+			switch (downColour.getColorID()) {
+			case Color.BLUE:
+				if (zone == 3)
+					follow = false;
+				else if (!left) {
+					left = false;
+					Motor.C.stop();
+					Motor.A.forward();
+				}
+				break;
+			case Color.GREEN:
+				if (zone == 2)
+					follow = false;
+				else if (!left) {
+					left = false;
+					Motor.C.stop();
+					Motor.A.forward();
+				}
+				break;
+			case Color.WHITE:
+				if (left) {
+					left = true;
+					Motor.A.stop();
+					Motor.C.forward();
+				}
+				break;
+			default:
+				if (!left) {
+					left = false;
+					Motor.C.stop();
+					Motor.A.forward();
+				}
+				break;
 			}
 		}
-		return ret;
 	}
 
 	private static void dumpTray() {
 		NXTF.B.backward();
+		trayTimerDing = false;
+		trayTimer.start();
+		while (!trayTimerDing)
+			continue;
+		NXTF.B.stop();
+		Motor.A.setSpeed(1080);
+		Motor.C.setSpeed(1080);
 		Motor.A.backward();
 		Motor.C.backward();
-		trayTimerDing = false;
-		trayTimer.start();
-		while (!trayTimerDing)
-			continue;
-		NXTF.B.stop();
-		Delay.msDelay(2000);
-		Motor.A.stop();
-		Motor.C.stop();
-		
-		
-		trayTimerDing = false;
-		trayTimer.start();
-		while (!trayTimerDing)
-			continue;
-
-		NXTF.B.forward();
+		Delay.msDelay(1000);
 		Motor.A.forward();
 		Motor.C.forward();
+		Delay.msDelay(1000);
+		Motor.A.stop();
+		Motor.C.stop();
+		NXTF.B.forward();
 		trayTimerDing = false;
 		trayTimer.start();
 		while (!trayTimerDing)
 			continue;
 		NXTF.B.stop();
-		Delay.msDelay(2000);
-		Motor.A.stop();
-		Motor.C.stop();
 	}
 
 	private static boolean BTConnect() {
@@ -335,10 +346,69 @@ public class HarvestB {
 		Motor.C.stop();
 		return ret;
 	}
-	private static void testBallLight(){
-		while(Button.ESCAPE.isUp()){
+
+	private static void testBallLight() {
+		while (Button.ESCAPE.isUp()) {
 			LCD.drawInt(ballLight.getLightValue(), 0, 0);
 		}
 		System.exit(0);
+	}
+
+	private static void testDownColour() {
+		while (Button.ESCAPE.isUp()) {
+			switch (downColour.getColorID()) {
+			case Color.BLACK:
+				LCD.drawString("Black", 0, 0);
+				break;
+			case Color.BLUE:
+				LCD.drawString("Blue", 0, 0);
+				break;
+			case Color.WHITE:
+				LCD.drawString("White", 0, 0);
+				break;
+			case Color.GREEN:
+				LCD.drawString("Green", 0, 0);
+				break;
+			default:
+				LCD.drawString("Unknown", 0, 0);
+				break;
+			}
+		}
+		System.exit(0);
+	}
+
+	private static int moveForward(int time) {
+		stopTimer.setDelay(time);
+		stopTimer.stop();
+		Motor.A.setSpeed(520);
+		Motor.C.setSpeed(520);
+		Motor.A.forward();
+		Motor.C.forward();
+		stopTimerDing = false;
+		stopTimer.start();
+		while (stopTimerDing) {
+			if (downColour.getColorID() == Color.WHITE) {
+				stopTimer.stop();
+				Motor.A.stop();
+				Motor.C.stop();
+				return 1;
+			}
+		}
+		Motor.A.stop();
+		Motor.C.stop();
+		return 0;
+	}
+
+	private static void recoil() {
+		Motor.A.setSpeed(520);
+		Motor.C.setSpeed(520);
+		Motor.A.backward();
+		Motor.C.backward();
+		Delay.msDelay(5000);
+		Motor.A.backward();
+		Motor.C.forward();
+		Delay.msDelay(3000);
+		Motor.A.stop();
+		Motor.C.stop();
 	}
 }

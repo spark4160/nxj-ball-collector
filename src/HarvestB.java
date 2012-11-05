@@ -2,7 +2,7 @@ import java.io.IOException;
 
 import lejos.nxt.Button;
 import lejos.nxt.ButtonListener;
-import lejos.nxt.ColourSensor;
+import lejos.nxt.ColorSensor;
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
@@ -73,6 +73,8 @@ public class HarvestB {
 		trayTimer.stop();
 		stopTimer.stop();
 		Motor.B.setSpeed(180);
+		
+		//testBallLight();
 
 		// Bluetooth connect
 		LCD.drawString("Connecting...", 0, 0);
@@ -87,6 +89,15 @@ public class HarvestB {
 		NXTF.B.setSpeed(90);
 		NXTF.B.stop();
 
+		//reset tray
+		
+		NXTF.B.forward();
+		trayTimerDing = false;
+		trayTimer.start();
+		while (!trayTimerDing)
+			continue;
+		NXTF.B.stop();
+		
 		// Run program		
 		// 2: silver, 3: blue
 		int searchBall = 2;
@@ -152,7 +163,7 @@ public class HarvestB {
 			60, 10);
 	private static Feature lastFeature;
 
-	private static ColourSensor downColour = new ColourSensor(SensorPort.S1);
+	private static ColorSensor downColour = new ColorSensor(SensorPort.S1);
 	private static LightSensor ballLight = new LightSensor(SensorPort.S3);
 
 	private static NXTCommConnector connector;
@@ -232,9 +243,11 @@ public class HarvestB {
 		trayTimer.start();
 		while (!trayTimerDing)
 			continue;
-		Motor.A.Stop();
-		Motor.C.Stop();
 		NXTF.B.stop();
+		Delay.msDelay(2000);
+		Motor.A.stop();
+		Motor.C.stop();
+		
 		
 		trayTimerDing = false;
 		trayTimer.start();
@@ -248,9 +261,10 @@ public class HarvestB {
 		trayTimer.start();
 		while (!trayTimerDing)
 			continue;
-		Motor.A.Stop();
-		Motor.C.Stop();
 		NXTF.B.stop();
+		Delay.msDelay(2000);
+		Motor.A.stop();
+		Motor.C.stop();
 	}
 
 	private static boolean BTConnect() {
@@ -293,7 +307,7 @@ public class HarvestB {
 			if (ballLight.getLightValue() > control + 5) {
 				move = false;
 			}
-			// if(downColour.getColourID() == 90){
+			// if(downColour.getColorID() == 90){
 			// // stop
 			// move = false;
 			// ret = 1;
@@ -320,5 +334,11 @@ public class HarvestB {
 		Motor.A.stop();
 		Motor.C.stop();
 		return ret;
+	}
+	private static void testBallLight(){
+		while(Button.ESCAPE.isUp()){
+			LCD.drawInt(ballLight.getLightValue(), 0, 0);
+		}
+		System.exit(0);
 	}
 }

@@ -77,6 +77,8 @@ public class HarvestB {
 
 		// testBallLight();
 		// testDownColour();
+		// lineFollow(2);
+		// System.exit(2);
 
 		// Bluetooth connect
 		LCD.drawString("Connecting...", 0, 0);
@@ -100,17 +102,16 @@ public class HarvestB {
 			continue;
 		NXTF.B.stop();
 
-		dumpTray();
-		System.exit(0);
-		
+		// dumpTray();
+		// System.exit(0);
+
 		// Run program
 		// 2: silver, 3: blue
 		int searchBall = 2;
 		int collected = 0;
-		int strikes;
 		liftArm();
 		for (searchBall = 2; searchBall < 4; searchBall++) {
-			for (strikes = 0; strikes < 3; strikes++) {
+			while (collected < 4) {
 				if (scanOnce() == null) {
 					// Move a little
 					Motor.A.forward();
@@ -123,12 +124,6 @@ public class HarvestB {
 					int found = moveToBall(searchBall);
 					if (found == searchBall) {
 						collected++;
-						strikes = 0;
-						if (collected == 4) {
-							strikes = 4;
-						}
-					} else if (found > 1) {
-						strikes = 0;
 					}
 					Motor.A.forward();
 					Motor.C.backward();
@@ -138,16 +133,10 @@ public class HarvestB {
 					}
 				}
 			}
-			// If strikes = 4 then dump
-			// If strikes = 3 then exit
-			if (strikes == 3) {
-				System.exit(2);
-			} else {
-				// Move to the line
-				moveForward(100000);
-				lineFollow(searchBall);
-				// Dump
-			}
+			// Move to the line
+			moveForward(100000);
+			lineFollow(searchBall);
+			// Dump
 		}
 
 		System.exit(0);
@@ -155,7 +144,7 @@ public class HarvestB {
 
 	private static UltrasonicSensor ultra = new UltrasonicSensor(SensorPort.S2);
 	private static FeatureDetector feature = new RangeFeatureDetector(ultra,
-			60, 10);
+			100, 10);
 	private static Feature lastFeature;
 
 	private static ColorSensor downColour = new ColorSensor(SensorPort.S1);
@@ -220,7 +209,7 @@ public class HarvestB {
 			case Color.BLUE:
 				if (zone == 3)
 					follow = false;
-				else if (!left) {
+				else if (left) {
 					left = false;
 					Motor.C.stop();
 					Motor.A.forward();
@@ -229,7 +218,7 @@ public class HarvestB {
 			case Color.GREEN:
 				if (zone == 2)
 					follow = false;
-				else if (!left) {
+				else if (left) {
 					left = false;
 					Motor.C.stop();
 					Motor.A.forward();
@@ -237,14 +226,14 @@ public class HarvestB {
 				break;
 			case Color.WHITE:
 				if (left) {
-					left = true;
+					left = false;
 					Motor.A.stop();
 					Motor.C.forward();
 				}
 				break;
 			default:
 				if (!left) {
-					left = false;
+					left = true;
 					Motor.C.stop();
 					Motor.A.forward();
 				}
@@ -318,11 +307,11 @@ public class HarvestB {
 			if (ballLight.getLightValue() > control + 5) {
 				move = false;
 			}
-			// if(downColour.getColorID() == 90){
-			// // stop
-			// move = false;
-			// ret = 1;
-			// }
+			if (downColour.getColorID() == Color.BLACK) {
+				// stop
+				move = false;
+				ret = 1;
+			}
 		}
 		Delay.msDelay(400);
 		if (ret == 0 && ballType == 2
@@ -387,7 +376,7 @@ public class HarvestB {
 		stopTimerDing = false;
 		stopTimer.start();
 		while (stopTimerDing) {
-			if (downColour.getColorID() == Color.WHITE) {
+			if (downColour.getColorID() == Color.BLACK) {
 				stopTimer.stop();
 				Motor.A.stop();
 				Motor.C.stop();
@@ -407,7 +396,7 @@ public class HarvestB {
 		Delay.msDelay(5000);
 		Motor.A.backward();
 		Motor.C.forward();
-		Delay.msDelay(3000);
+		Delay.msDelay(5000);
 		Motor.A.stop();
 		Motor.C.stop();
 	}

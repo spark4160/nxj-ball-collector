@@ -102,9 +102,6 @@ public class HarvestB {
 			continue;
 		NXTF.B.stop();
 
-		// dumpTray();
-		// System.exit(0);
-
 		// Run program
 		// 2: silver, 3: blue
 		int searchBall = 2;

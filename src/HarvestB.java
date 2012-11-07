@@ -111,6 +111,7 @@ public class HarvestB {
 		int collected = 0;
 		liftArm();
 		for (searchBall = 2; searchBall < 4; searchBall++) {
+			collected = 0;
 			while (collected < 4) {
 				if (scanOnce() == null) {
 					// Move a little

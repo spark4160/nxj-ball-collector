@@ -94,7 +94,7 @@ public class HarvestBNew {
 			if (targetColour == Color.BLUE) {
 				running = false;
 			} else {
-				// Find the blue balls
+				// Otherwise find the blue balls
 				targetColour = Color.GREEN;
 			}
 		}
@@ -272,7 +272,7 @@ public class HarvestBNew {
 		timer.start();
 		featureDetector.enableDetection(true);
 		// Wait until something has been detected or the scanning has timed out
-		while (timing && lastSeenFeature == null)
+		while (timing && (lastSeenFeature == null))
 			continue;
 		// Stop the timer and detection
 		timer.stop();

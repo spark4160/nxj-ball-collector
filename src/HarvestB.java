@@ -244,6 +244,7 @@ public class HarvestB {
 				break;
 			}
 		}
+		//turn 90 degrees from the line so that it can dump the balls
 		Motor.A.forward();
 		Motor.B.backward();
 		Delay.msDelay(500);

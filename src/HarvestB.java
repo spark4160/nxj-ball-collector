@@ -136,6 +136,7 @@ public class HarvestB {
 			// Move to the line
 			moveForward(100000);
 			lineFollow(searchBall);
+			dumpTray();
 			// Dump
 		}
 
@@ -239,6 +240,30 @@ public class HarvestB {
 				}
 				break;
 			}
+		}
+		Motor.A.forward();
+		Motor.B.backward();
+		Delay.msDelay(500);
+		switch (downColour.getColorID()) {
+		case Color.GREEN:
+			if (zone == 2) {
+			Motor.A.backward();
+			Motor.C.forward();
+			Delay.msDelay(1000);
+			}
+		case Color.BLUE:
+			if (zone == 3) {
+			Motor.A.backward();
+			Motor.C.forward();
+			Delay.msDelay(1000);
+			}
+		case Color.BLACK:
+			Motor.A.backward();
+			Motor.C.forward();
+			Delay.msDelay(1000);
+		Delay.msDelay(2000);
+		Motor.A.stop();
+		Motor.C.stop();
 		}
 	}
 

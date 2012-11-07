@@ -261,6 +261,8 @@ public class HarvestB {
 			Motor.A.backward();
 			Motor.C.forward();
 			Delay.msDelay(1000);
+		default:
+			continue;
 		Delay.msDelay(2000);
 		Motor.A.stop();
 		Motor.C.stop();

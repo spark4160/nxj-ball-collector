@@ -181,6 +181,7 @@ public class HarvestB {
 	});
 
 	private static Feature scanOnce() {
+		//scans the area around the robot for a ball
 		lastFeature = null;
 		Motor.A.setSpeed(90);
 		Motor.C.setSpeed(90);
@@ -272,6 +273,7 @@ public class HarvestB {
 	}
 
 	private static void dumpTray() {
+		//dumps the balls out of the tray
 		NXTF.B.backward();
 		trayTimerDing = false;
 		trayTimer.start();
@@ -297,6 +299,7 @@ public class HarvestB {
 	}
 
 	private static boolean BTConnect() {
+		//connects the two NXTs together using bluetooth
 		try {
 			connector = Bluetooth.getConnector();
 			NXTF = new RemoteNXT("NXTCHEES", connector);
@@ -307,6 +310,7 @@ public class HarvestB {
 	}
 
 	private static void dropArm() {
+		//drops the forklift
 		Motor.B.backward();
 		armTimerDing = false;
 		armTimer.start();
@@ -316,6 +320,7 @@ public class HarvestB {
 	}
 
 	private static void liftArm() {
+		//lifts the forklift
 		Motor.B.forward();
 		armTimerDing = false;
 		armTimer.start();
@@ -366,6 +371,7 @@ public class HarvestB {
 	}
 
 	private static void testBallLight() {
+		//dispays the light value of the object in front of the light sensor
 		while (Button.ESCAPE.isUp()) {
 			LCD.drawInt(ballLight.getLightValue(), 0, 0);
 		}
@@ -373,6 +379,7 @@ public class HarvestB {
 	}
 
 	private static void testDownColour() {
+		//dispays which colour is underneath the colour sensor on the screen of the NXT
 		while (Button.ESCAPE.isUp()) {
 			switch (downColour.getColorID()) {
 			case Color.BLACK:
@@ -396,6 +403,7 @@ public class HarvestB {
 	}
 
 	private static int moveForward(int time) {
+		//moves the robot forward until the timer ends or the robot passes over a black line
 		stopTimer.setDelay(time);
 		stopTimer.stop();
 		Motor.A.setSpeed(520);
@@ -418,6 +426,7 @@ public class HarvestB {
 	}
 
 	private static void recoil() {
+		//moves backwards followed by turning a small amount
 		Motor.A.setSpeed(520);
 		Motor.C.setSpeed(520);
 		Motor.A.backward();

@@ -24,6 +24,10 @@ public class HarvestBNew {
 	// Components:
 	// Main
 	// Set up
+	// Turn left
+	// Turn right
+	// Move forward
+	// Move backward
 	// Scan for ball
 	// Move forward
 	// Follow line
@@ -57,75 +61,39 @@ public class HarvestBNew {
 			int collected = 0;
 			while (collected < 4) {
 				// Still balls to find, find them
+				boolean timeOut = true;
+				int time = 5000;
 				if (Scan()) {
-					// Something was seen
-					int result = MoveForward(true, targetColour, false, 0);
-					if (result == targetColour) {
-						// A good ball was collected
-						collected++;
-					} else if (result == 1) {
-						// The line was hit
-						// Set the motor speeds
-						Motor.A.setSpeed(720);
-						Motor.C.setSpeed(720);
-						// Move away
-						Motor.A.backward();
-						Motor.C.backward();
-						Delay.msDelay(5000);
-						Motor.A.forward();
-						Motor.C.backward();
-						Delay.msDelay(5000);
-						Motor.A.stop();
-						Motor.C.stop();
-					}
-				} else {
-					// Timed out
-					// Set the motor speeds
-					Motor.A.setSpeed(720);
-					Motor.C.setSpeed(720);
-					// Start to move
-					Motor.A.forward();
-					Motor.C.forward();
-					Delay.msDelay(5000);
-					// Stop
-					Motor.A.stop();
-					Motor.C.stop();
+					timeOut = false;
+				}
+				// Lower the forklift
+				ForkDrop();
+				int result = ProbeForward(true, targetColour, timeOut, time);
+				if (result == targetColour) {
+					// A good ball was collected
+					collected++;
+				} else if (result == 1) {
+					// The line was hit
+					MoveBackward(720, 2000);
+					TurnRight(720, 1000);
 				}
 			}
 			// 4 of a ball have been collected
 			// Move to the line
-			MoveForward(false, 0, false, 0);
+			ProbeForward(false, 0, false, 0);
 			// Move a bit forward
-			// Set the motor speeds
-			Motor.A.setSpeed(720);
-			Motor.C.setSpeed(720);
-			// Start to move
-			Motor.A.forward();
-			Motor.C.forward();
-			Delay.msDelay(500);
-			// Stop
-			Motor.A.stop();
-			Motor.C.stop();
+			MoveForward(720, 250);
 			// Follow the line to the right zone
 			FollowLine(targetColour);
 			// Dump the balls
 			Dump();
 			// Move into the field
-			// Set the motor speeds
-			Motor.A.setSpeed(720);
-			Motor.C.setSpeed(720);
-			// Start to move
-			Motor.A.forward();
-			Motor.C.forward();
-			Delay.msDelay(5000);
-			// Stop
-			Motor.A.stop();
-			Motor.C.stop();
+			MoveForward(720, 5000);
 
 			// If it has just found the blue balls, then it's time to go
-			if(targetColour == Color.BLUE){
+			if (targetColour == Color.BLUE) {
 				running = false;
-			}else{
+			} else {
 				// Find the blue balls
 				targetColour = Color.GREEN;
 			}
@@ -187,14 +155,10 @@ public class HarvestBNew {
 		// Set up motors
 		// Arm
 		Motor.B.setSpeed(180);
-		Motor.B.forward();
-		Delay.msDelay(750);
-		Motor.B.stop();
+		ForkLift();
 		// Cage
 		NXTCHEES.B.setSpeed(90);
-		NXTCHEES.B.forward();
-		Delay.msDelay(800);
-		NXTCHEES.B.stop();
+		CageLift();
 		// Wheels
 		Motor.A.setSpeed(180);
 		Motor.C.setSpeed(180);
@@ -202,6 +166,94 @@ public class HarvestBNew {
 		Motor.C.stop();
 
 		return true;
+	}
+
+	// Turn left
+	private static void TurnLeft(int speed, int time) {
+		// Set speed
+		Motor.A.setSpeed(speed);
+		Motor.C.setSpeed(speed);
+		// Start moving
+		Motor.A.backward();
+		Motor.C.forward();
+		// Wait
+		Delay.msDelay(time);
+		// Stop
+		Motor.A.stop();
+		Motor.C.stop();
+	}
+
+	// Turn right
+	private static void TurnRight(int speed, int time) {
+		// Set speed
+		Motor.A.setSpeed(speed);
+		Motor.C.setSpeed(speed);
+		// Start moving
+		Motor.A.forward();
+		Motor.C.backward();
+		// Wait
+		Delay.msDelay(time);
+		// Stop
+		Motor.A.stop();
+		Motor.C.stop();
+	}
+
+	// Move forward
+	private static void MoveForward(int speed, int time) {
+		// Set speed
+		Motor.A.setSpeed(speed);
+		Motor.C.setSpeed(speed);
+		// Start moving
+		Motor.A.forward();
+		Motor.C.forward();
+		// Wait
+		Delay.msDelay(time);
+		// Stop
+		Motor.A.stop();
+		Motor.C.stop();
+	}
+
+	// Move backward
+	private static void MoveBackward(int speed, int time) {
+		// Set speed
+		Motor.A.setSpeed(speed);
+		Motor.C.setSpeed(speed);
+		// Start moving
+		Motor.A.backward();
+		Motor.C.backward();
+		// Wait
+		Delay.msDelay(time);
+		// Stop
+		Motor.A.stop();
+		Motor.C.stop();
+	}
+
+	// Fork lift
+	private static void ForkLift() {
+		Motor.B.forward();
+		Delay.msDelay(750);
+		Motor.B.stop();
+	}
+
+	// Fork drop
+	private static void ForkDrop() {
+		Motor.B.backward();
+		Delay.msDelay(750);
+		Motor.B.stop();
+	}
+
+	// Cage lift
+	private static void CageLift() {
+		NXTCHEES.B.forward();
+		Delay.msDelay(800);
+		NXTCHEES.B.stop();
+	}
+
+	// Cage drop
+	private static void CageDrop() {
+		NXTCHEES.B.backward();
+		Delay.msDelay(800);
+		NXTCHEES.B.stop();
 	}
 
 	// Scan for a ball
@@ -236,7 +288,7 @@ public class HarvestBNew {
 	}
 
 	// Move forward
-	private static int MoveForward(boolean pickUp, int targetBall,
+	private static int ProbeForward(boolean pickUp, int targetBall,
 			boolean timed, int milliSeconds) {
 		// Return 0 if it just moved forward, 1 if it hit a line, Color.GREEN if
 		// it hit a silver ball and Color.BLUE if it hit a blue ball
@@ -287,22 +339,12 @@ public class HarvestBNew {
 			if (returnInt == targetBall) {
 				// Found a good ball
 				// Pick it up
-				Motor.B.forward();
-				Delay.msDelay(750);
-				Motor.B.backward();
-				Delay.msDelay(750);
-				Motor.B.stop();
+				ForkLift();
 			} else if (returnInt != targetBall) {
 				// Found a bad ball
 				// Move away
-				Motor.A.backward();
-				Motor.C.backward();
-				Delay.msDelay(5000);
-				Motor.A.forward();
-				Motor.C.backward();
-				Delay.msDelay(5000);
-				Motor.A.stop();
-				Motor.C.stop();
+				MoveBackward(720, 3000);
+				TurnRight(720, 1000);
 			}
 		}
 		// Stop moving
@@ -390,29 +432,10 @@ public class HarvestBNew {
 
 	// Dump cage
 	private static void Dump() {
-		// Set the motor speeds
-		Motor.A.setSpeed(720);
-		Motor.C.setSpeed(720);
-		// Turn to the right
-		Motor.A.forward();
-		Motor.C.backward();
-		Delay.msDelay(2000);
-		Motor.A.stop();
-		Motor.C.stop();
-		// Release cage
-		NXTCHEES.B.backward();
-		Delay.msDelay(800);
-		NXTCHEES.B.stop();
-		// Move backward quickly
-		Motor.A.backward();
-		Motor.C.backward();
-		Delay.msDelay(2000);
-		// Move forward quickly
-		Motor.A.forward();
-		Motor.C.forward();
-		Delay.msDelay(2000);
-		// Stop
-		Motor.A.stop();
-		Motor.C.stop();
+		TurnRight(720, 1000);
+		CageDrop();
+		MoveBackward(1080, 1000);
+		MoveForward(1080, 1000);
+		CageLift();
 	}
 }

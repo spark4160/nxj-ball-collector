@@ -35,9 +35,13 @@ public class HarvestB {
 		// If ball is dark pick up
 		// Else let it be, reverse for half a second then search for next ball
 		// If the robot spins multiple times without detecting a ball then
-		// move in one direction a bit and search again
-		// if still no balls are present after three movements
-		// then move to edge of circle and end program
+		// Move in one direction a bit and search again
+		// If four balls of one colour have been collected
+		// Move to line
+		// Follow line until it reaches the zone corresponding to the balls it collected
+		// Dump the balls
+		// Repeat for the other balls
+		// End program
 
 		// Ports:
 		// NXTF:
